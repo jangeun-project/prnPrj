@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="member">
+	<select id="select" resultClass="hmap" parameterClass="map">
+		SELECT 
+			USER_ID, USER_PW, USER_NM, GRADE, REG_DTM
+		FROM 
+			MEMBER 
+		WHERE 
+			DEL_YN = 'N' AND USER_ID = #userid# 
+	</select>
+
+	<select id="getMemberList" resultClass="hmap" parameterClass="map">
+		SELECT 
+			SUM(1) OVER() AS TOTCNT
+			, USER_ID, USER_PW, USER_NM, GRADE
+			, DATE_FORMAT(STR_TO_DATE(REG_DTM, '%Y%m%d%H%i'), '%Y-%m-%d %H:%i:%s') AS REG_DTM
+		FROM 
+			MEMBER 
+		WHERE 
+			DEL_YN = 'N'  
+	</select>
+	
+    <!-- Member 저장-->
+	<insert id="insertMember">
+		INSERT 
+		INTO MEMBER
+		(
+			USER_ID
+			,USER_PW
+			,USER_NM
+			,GRADE
+			,DEL_YN
+			,REG_DTM
+		)
+		VALUES
+		(
+			#userId#
+			,#userPw#
+			,#userNm#
+			,'1'
+			,'N'
+			,DATE_FORMAT(sysdate(), '%Y%m%d%H%i') 
+		)
+	</insert>
+
+	<update id="updateMember">
+		UPDATE /* [sit-member.xml].[member.updateMember].[01] 변경일자(2011.03) */
+		MEMBER
+			SET
+				<isNotEmpty property="PW">
+				PW = #PW:VARCHAR:NO_ENTRY#
+				</isNotEmpty>
+				<isNotEmpty property="MEM_NAME">
+				,MEM_NAME = #MEM_NAME:VARCHAR:NO_ENTRY#
+				</isNotEmpty>
+				<isNotEmpty property="DEPT">
+				,DEPT = #DEPT:VARCHAR:NO_ENTRY#
+				</isNotEmpty>
+				<isNotEmpty property="GRADE">
+				,GRADE = #GRADE:VARCHAR:NO_ENTRY#
+				</isNotEmpty>
+				<isNotEmpty property="MOBILE">
+				,MOBILE = #MOBILE:VARCHAR:NO_ENTRY#
+				</isNotEmpty>
+				<isNotEmpty property="PHONE">
+				,PHONE = #PHONE:VARCHAR:NO_ENTRY#
+				</isNotEmpty>
+				<isNotEmpty property="EMAIL">
+				,EMAIL = #EMAIL:VARCHAR:NO_ENTRY#
+				</isNotEmpty>
+				<isNotEmpty property="BIGO">
+				,BIGO = #BIGO:VARCHAR:NO_ENTRY#
+				</isNotEmpty>
+				<isNotEmpty property="SAE_MEM_YN">
+				,SAE_MEM_YN = #SAE_MEM_YN:VARCHAR:NO_ENTRY#
+				</isNotEmpty>
+		WHERE
+			MEM_ID=#MEM_ID#
+	</update>
+
+	<delete id="deleteMember">
+		UPDATE 
+			MEMBER
+		SET 
+			DEL_YN = 'Y'	
+		WHERE 1=1
+			AND USER_ID=#userId#
+	</delete>
+
+	
+</sqlMap>

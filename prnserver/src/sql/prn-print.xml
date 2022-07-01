@@ -1,0 +1,579 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="print">
+
+	<!--스캔리스트 조회 
+	 -->
+	<select id="getScanList" resultClass="hmap" parameterClass="map">
+	SELECT TT.*
+		FROM (		
+				SELECT
+				    ROW_NUMBER() OVER ( ORDER BY usageTime DESC )  AS ROWNO 
+					,SUM(1) OVER() AS totalcnt
+					, S.usageTime, S.imageFilePath, S.imageFileSize ,S.imageLogPath
+					, S.pageCount, S.destination
+					, S.logId, U.name AS userName, U.deptId
+					, dbo.ufn_getFullDeptName( U.deptId ) AS fullDeptName
+					, M.modelName AS modelName
+					, (CASE WHEN usageTime > (GETDATE() - convert(integer, 1)) THEN 'Y'
+         			  ELSE 'N' END) AS DisYn
+				FROM 
+					TBL_SCAN_LOG S
+			  	INNER JOIN TBL_USER U
+					ON S.userName = U.loginId
+				INNER JOIN TBL_MFP M
+			  		ON S.mfpId = M.mfpId
+			  	WHERE
+			  		1=1	
+			      	<isNotEmpty property="searchSt">
+				      	<isNotEmpty property="searchEt">
+							AND usageTime BETWEEN CONVERT( DATETIME, #searchSt#)  
+							                  AND CONVERT( DATETIME, #searchEt#  + ' 23:59:59.999')
+				      	</isNotEmpty>
+			      	</isNotEmpty>
+
+			      	<isEqual property="authCheck" compareValue="confirm" >
+			      		AND U.loginId = #userId#
+			      		<isNotEmpty property="setDay">
+			      		AND  usageTime > (GETDATE() - convert(integer, #setDay#) )
+			      		</isNotEmpty>
+			      	</isEqual>
+			      	<isEqual property="authCheck" compareValue="user" >
+			      		AND U.loginId = #userId#
+			      		<isNotEmpty property="setDay">
+			      		AND  usageTime > (GETDATE() - convert(integer, #setDay#) )
+			      		</isNotEmpty>
+			      	</isEqual>
+		) TT			
+		WHERE TT.ROWNO BETWEEN #stRow# AND #edRow#
+        ORDER BY usageTime DESC		
+    
+	</select>
+	
+	<!--수신 팩스 조회 
+	 -->
+	<select id="getReceiveFaxList" resultClass="hmap" parameterClass="map">
+	SELECT TT.*
+	FROM (	
+				SELECT ROW_NUMBER() OVER ( ORDER BY usageTime DESC ) ROWNO
+				                        ,SUM(1) OVER() AS totalcnt
+										, FRL.logId, FRL.usageTime, FRL.imageFilePath, FRL.imageFileSize
+										, FRL.imageLogPath
+										, FRL.pageCount, FRL.statsApplyYn, FRL.adminDeleteYn
+										, FRL.faxId,FRL.status,FRL.forceEndCause,FRL.deleteCause, F.number AS faxNumber, F.mfpId
+										, ( SELECT serialNumber FROM TBL_MFP WHERE mfpId = F.mfpId ) AS serialNumber
+										, ( SELECT modelName FROM TBL_MFP WHERE mfpId = F.mfpId ) AS modelName
+										, (CASE WHEN usageTime > (GETDATE() - convert(integer, 1)) THEN 'Y'
+         			  					   ELSE 'N' END) AS DisYn
+				FROM	TBL_FAXRX_LOG FRL
+							INNER JOIN TBL_FAX F ON FRL.faxId = F.faxId
+							INNER JOIN TBL_MFP M ON F.mfpId = M.mfpId
+				WHERE	1=1	
+				    <isNotEmpty property="seachNumber">
+				  			AND   F.number = #seachNumber#
+				  	</isNotEmpty>		
+			      	<isNotEmpty property="searchSt">
+				      	<isNotEmpty property="searchEt">
+							AND usageTime BETWEEN CONVERT( DATETIME, #searchSt#)  
+							                  AND CONVERT( DATETIME, #searchEt#  + ' 23:59:59.999' )
+				      	</isNotEmpty>
+			      	</isNotEmpty>
+			      	<isNotEmpty property="setDay">
+			      	AND  usageTime > (GETDATE() - convert(integer, #setDay#) )
+			      	</isNotEmpty>
+	) TT			
+	WHERE TT.ROWNO BETWEEN #stRow# AND #edRow#
+	ORDER BY usageTime DESC			
+	</select>
+	
+	<!--발송 팩스 조회 
+	 -->
+	<select id="getSendFaxList" resultClass="hmap" parameterClass="map">
+	SELECT TT.*
+	FROM (	
+				SELECT ROW_NUMBER() OVER ( ORDER BY usageTime DESC ) ROWNO
+                        ,SUM(1) OVER() AS totalcnt
+						, FRL.logId, FRL.usageTime, FRL.imageFilePath, FRL.imageFileSize
+						, FRL.imageLogPath
+						, FRL.pageCount 
+						, US.name AS userName
+						, FRL.confirmYn AS confirmYn
+						, F.number AS faxNumber, F.mfpId
+						, FRL.receiveName
+						, FRL.faxTitle
+						, FRL.receiver
+						, FRL.confirmTime
+						, FRL.TXNumber
+						, dbo.ufn_getFullDeptName( US.deptId ) AS fullDeptName
+						, ( SELECT serialNumber FROM TBL_MFP WHERE mfpId = F.mfpId ) AS serialNumber
+						, ( SELECT modelName FROM TBL_MFP WHERE mfpId = F.mfpId ) AS modelName
+						, (CASE WHEN usageTime > (GETDATE() - convert(integer, 1)) THEN 'Y'
+         			  	   ELSE 'N' END) AS DisYn
+				FROM	TBL_CONFIRM_FAXTX_LOG FRL
+						INNER JOIN TBL_FAX F ON FRL.mfpId = F.mfpId
+						INNER JOIN TBL_MFP M ON F.mfpId = M.mfpId
+						INNER JOIN TBL_USER US ON 1=1 
+							<isEqual property="authCheck" compareValue="confirm" >
+								AND US.loginId = #userId#
+							</isEqual>
+							<isEqual property="authCheck" compareValue="user" >
+								AND US.loginId = #userId#
+							</isEqual>	
+				WHERE	1=1	
+				  AND   FRL.userName = US.loginId	
+			      	<isNotEmpty property="searchSt">
+				      	<isNotEmpty property="searchEt">
+							AND usageTime BETWEEN CONVERT( DATETIME, #searchSt#)  
+							                  AND CONVERT( DATETIME, #searchEt#  + ' 23:59:59.999')
+				      	</isNotEmpty>
+			      	</isNotEmpty>
+			      	
+	      			<isEqual property="authCheck" compareValue="confirm" >
+	      				<isNotEmpty property="setDay">
+						AND FRL.usageTime  > (GETDATE() - convert(integer, #setDay#) )
+						</isNotEmpty>
+					</isEqual>
+					<isEqual property="authCheck" compareValue="user" >
+						<isNotEmpty property="setDay">
+						AND FRL.usageTime  > (GETDATE() - convert(integer, #setDay#) )
+						</isNotEmpty>
+					</isEqual>	
+	) TT			
+	WHERE TT.ROWNO BETWEEN #stRow# AND #edRow#
+	ORDER BY usageTime DESC			
+	</select>
+	
+	<!--관리자 발신 팩스 조회 
+	 -->
+	<select id="getConfirmFaxList" resultClass="hmap" parameterClass="map">
+	SELECT TT.*
+	FROM (	
+				SELECT ROW_NUMBER() OVER ( ORDER BY usageTime DESC ) ROWNO
+                        ,SUM(1) OVER() AS totalcnt
+						, FRL.logId, FRL.usageTime, FRL.imageFilePath, FRL.imageFileSize
+						, FRL.imageLogPath
+						, FRL.pageCount 
+						, US.name AS userName
+						, FRL.confirmYn AS confirmYn
+						, F.number AS faxNumber, F.mfpId
+						, FRL.receiveName
+						, FRL.faxTitle
+						, FRL.receiver
+						, FRL.confirmTime
+						, FRL.TXNumber
+						, dbo.ufn_getFullDeptName( US.deptId ) AS fullDeptName
+						, ( select name From TBL_USER WHERE loginId = FRL.confirmId ) AS confirmName
+						, ( SELECT serialNumber FROM TBL_MFP WHERE mfpId = F.mfpId ) AS serialNumber
+						, ( SELECT modelName FROM TBL_MFP WHERE mfpId = F.mfpId ) AS modelName
+						, (CASE WHEN usageTime > (GETDATE() - convert(integer, 1)) THEN 'Y'
+         			  	   ELSE 'N' END) AS DisYn
+				FROM	TBL_CONFIRM_FAXTX_LOG FRL
+						LEFT JOIN TBL_FAX F ON FRL.mfpId = F.mfpId
+						LEFT JOIN TBL_MFP M ON F.mfpId = M.mfpId
+						LEFT JOIN TBL_USER US ON US.loginId = FRL.userName   
+				WHERE	1=1	
+			      	<isNotEmpty property="searchSt">
+				      	<isNotEmpty property="searchEt">
+							AND usageTime BETWEEN CONVERT( DATETIME, #searchSt#)  
+							                  AND CONVERT( DATETIME, #searchEt#  + ' 23:59:59.999')
+				      	</isNotEmpty>
+			      	</isNotEmpty>
+			      	
+			      	<isEqual property="authCheck" compareValue="confirm" >
+			      		<isNotEmpty property="setDay">
+						AND usageTime  > (GETDATE() - convert(integer, #setDay#) )
+						</isNotEmpty>
+					</isEqual>
+					<isEqual property="authCheck" compareValue="user" >
+						<isNotEmpty property="setDay">
+						AND usageTime  > (GETDATE() - convert(integer, #setDay#) )
+						</isNotEmpty>
+					</isEqual>	
+	) TT			
+	WHERE TT.ROWNO BETWEEN #stRow# AND #edRow#
+	ORDER BY usageTime DESC			
+	</select>
+	
+	<!--사용자 발신 팩스 조회 
+	 -->
+	<select id="getConfirmFaxUserList" resultClass="hmap" parameterClass="map">
+	SELECT TT.*
+	FROM (	
+				SELECT ROW_NUMBER() OVER ( ORDER BY usageTime DESC ) ROWNO
+                        ,SUM(1) OVER() AS totalcnt
+						, FRL.logId, FRL.usageTime, FRL.imageFilePath, FRL.imageFileSize
+						, FRL.imageLogPath
+						, FRL.pageCount 
+						, US.name AS userName
+						, FRL.confirmYn AS confirmYn
+						, F.number AS faxNumber, F.mfpId
+						, dbo.ufn_getFullDeptName( US.deptId ) AS fullDeptName
+						, FRL.receiveName
+						, FRL.faxTitle
+						, FRL.receiver
+						, FRL.confirmTime
+						, FRL.TXNumber
+						, ( select name From TBL_USER WHERE loginId = FRL.confirmId ) AS confirmName
+						, ( SELECT serialNumber FROM TBL_MFP WHERE mfpId = F.mfpId ) AS serialNumber
+						, ( SELECT modelName FROM TBL_MFP WHERE mfpId = F.mfpId ) AS modelName
+						, (CASE WHEN usageTime > (GETDATE() - convert(integer, 1)) THEN 'Y'
+         			  	   ELSE 'N' END) AS DisYn
+				FROM	TBL_CONFIRM_FAXTX_LOG FRL
+						INNER JOIN TBL_FAX F ON FRL.mfpId = F.mfpId
+						INNER JOIN TBL_MFP M ON F.mfpId = M.mfpId
+						INNER JOIN TBL_USER US ON US.loginId = FRL.userName   
+				WHERE	1=1	
+				  AND   US.deptId IN ( SELECT deptId FROM tbl_user 
+				                        WHERE 1=1
+				                        <isEqual property="authCheck" compareValue="confirm" >
+											AND loginId = #userId#
+										</isEqual>
+										<isEqual property="authCheck" compareValue="user" >
+											AND loginId = #userId#
+										</isEqual>
+				                       )
+				  <isNotEmpty property="setDay">
+				  AND  FRL.usageTime > (GETDATE() - convert(integer, #setDay#) )
+				  </isNotEmpty>
+			      	<isNotEmpty property="searchSt">
+				      	<isNotEmpty property="searchEt">
+							AND usageTime BETWEEN CONVERT( DATETIME, #searchSt#)  
+							                  AND CONVERT( DATETIME, #searchEt#  + ' 23:59:59.999')
+				      	</isNotEmpty>
+			      	</isNotEmpty>
+	) TT			
+	WHERE TT.ROWNO BETWEEN #stRow# AND #edRow#
+	ORDER BY usageTime DESC			
+	</select>
+	
+	<!--사용자 발신 팩스 조회 
+	 -->
+	<select id="getExcelList" resultClass="hmap" parameterClass="map">
+	SELECT      TT.ROWNO
+		       ,CONVERT(VARCHAR(20), TT.usageTime, 20) AS usageTime
+		       ,TT.faxNumber
+		       ,TT.fullDeptName
+		       ,TT.userName
+		       ,TT.pageCount
+		       ,TT.confirmYn
+		       ,TT.receiver
+			   ,TT.referName
+			   ,TT.receiveName
+			   ,TT.docuNum
+			   ,TT.faxTitle
+			   ,TT.receiver
+			   ,TT.confirmName
+			   ,TT.TXNumber
+	FROM (	
+				SELECT ROW_NUMBER() OVER ( ORDER BY usageTime DESC ) ROWNO
+				                        ,SUM(1) OVER() AS totalcnt
+										, FRL.logId, FRL.usageTime, FRL.imageFilePath, FRL.imageFileSize
+										, FRL.imageLogPath
+										, FRL.pageCount 
+										, US.name AS userName
+										, FRL.confirmYn AS confirmYn
+										, F.number AS faxNumber, F.mfpId
+										, FRL.receiveName
+										, FRL.faxTitle
+										, FRL.receiver
+										, FRL.referName
+										, FRL.docuNum
+										, FRL.TXNumber
+										, dbo.ufn_getFullDeptName( US.deptId ) AS fullDeptName
+										, (	SELECT name FROM TBL_USER WHERE loginId = FRL.confirmId ) AS confirmName
+				FROM	TBL_CONFIRM_FAXTX_LOG FRL
+						INNER JOIN TBL_FAX F ON FRL.mfpId = F.mfpId
+						INNER JOIN TBL_MFP M ON F.mfpId = M.mfpId
+						INNER JOIN TBL_USER US ON US.loginId = FRL.userName   
+				WHERE	1=1	
+				 AND    FRL.sendYn = 'Y'
+				 AND    FRL.confirmYn NOT IN ('W')
+	) TT		
+	WHERE 1=1
+		<isNotEmpty property="searchSt">
+	      	<isNotEmpty property="searchEt">
+				AND TT.usageTime BETWEEN CONVERT( DATETIME, #searchSt#)  
+				                  AND CONVERT( DATETIME, #searchEt#  + ' 23:59:59.999')
+	      	</isNotEmpty>
+      	</isNotEmpty>	
+	ORDER BY usageTime DESC		;		
+	</select>
+	
+	<select id="getModifyInform" resultClass="hmap" parameterClass="map">
+	SELECT
+		receiveName
+		,faxTitle
+		,receiver
+	FROM 
+		TBL_CONFIRM_FAXTX_LOG
+	WHERE
+		logId = #logId#
+	</select>
+	
+	<select id="getSendFaxInform" resultClass="hmap" parameterClass="map">
+	SELECT
+			 frl.logid, frl.usagetime, frl.imagefilepath, frl.imagefilesize
+			, frl.imagelogpath
+			, frl.pagecount 
+			, frl.confirmyn as confirmyn
+			, f.number as faxnumber, f.mfpid
+			, ( select serialnumber from tbl_mfp where mfpid = f.mfpid ) as serialnumber
+			, ( select modelname from tbl_mfp where mfpid = f.mfpid ) as modelname
+				from	
+					tbl_confirm_faxtx_log frl
+					inner join tbl_fax f on frl.mfpid = f.mfpid
+					inner join tbl_mfp m on f.mfpid = m.mfpid
+	WHERE	1=1	
+	  AND frl.logid = #logId#	
+	</select>
+	
+	<update id="updateModify">
+		UPDATE 
+		TBL_CONFIRM_FAXTX_LOG
+			SET
+				confirmYn = 'N'	
+				, confirmId = ''
+				, confirmTime = null
+				, faxTitle = #title#
+				, receiveName = #receiveName#
+				, receiver = #receiver#
+		WHERE
+			logId=#logId#
+	</update>
+	
+	<update id="setUpdateConfirm">
+		UPDATE 
+		TBL_CONFIRM_FAXTX_LOG
+			SET
+				confirmYn = 'Y'
+				, confirmId = #confirmId#
+				, confirmTime = getdate()
+		WHERE
+			logId=#logId#
+	</update>
+	
+	<update id="setUpdateConfirmStatus">
+		UPDATE 
+		TBL_CONFIRM_FAXTX_LOG
+			SET
+				confirmYn = #status#
+				, confirmId = #confirmId#
+				, confirmTime = getdate()
+		WHERE
+			logId=#logId#
+	</update>
+	
+	<select id="getConfigList" resultClass="hmap" parameterClass="map">
+		SELECT
+			value1 AS setDay
+		FROM
+			TBL_SET_CONFIG
+		WHERE 
+			seq = #seq#
+	</select>
+	
+	
+	
+	<select id="getConfigListCnt" parameterClass="hmap" resultClass="int">
+		<![CDATA[
+		SELECT 
+			count(*) AS CNT
+		FROM 
+			TBL_SET_CONFIG 
+		WHERE 
+		  seq = '1'
+		]]>
+	</select>
+	
+	<insert id="insertConfig">
+		INSERT 
+		INTO TBL_SET_CONFIG
+		(
+			seq
+			,seqNm
+			,value1
+			,value2
+			,value3
+		)VALUES
+		(
+			'1'
+			,'조회기간'
+			,#setday#
+			,''
+			,''
+		)
+	</insert>	
+	
+	<update id="setConfig">
+		UPDATE 
+			TBL_SET_CONFIG
+		SET
+			value1 = #setday#
+		WHERE
+			seq='1'
+	</update>
+
+    <!-- Member 저장-->
+	<insert id="insertMember">
+		INSERT 
+		INTO MEMBER
+		(
+			MEM_ID
+			,PW
+			,MEM_NAME
+			,DEPT
+			,REG_DTM
+			,GRADE
+			,MOBILE
+			,PHONE
+			,EMAIL
+			,BIGO
+			,USE_YN
+			,SAE_MEM_YN
+			,OTP_USE
+		)
+		VALUES
+		(
+			#MEM_ID#
+			,#PW#
+			,#MEM_NAME#
+			,#DEPT#
+			,TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS')
+			,#GRADE:VARCHAR:NO_ENTRY#
+			,#MOBILE:VARCHAR:NO_ENTRY#
+			,#PHONE:VARCHAR:NO_ENTRY#
+			,#EMAIL:VARCHAR:NO_ENTRY#
+			,#BIGO:VARCHAR:NO_ENTRY#
+			,'Y'
+			,#SAE_MEM_YN:VARCHAR:NO_ENTRY#
+			,'Y'
+		)
+	</insert>
+
+	<update id="updateMember">
+		UPDATE /* [sit-member.xml].[member.updateMember].[01] 변경일자(2011.03) */
+		MEMBER
+			SET
+				<isNotEmpty property="PW">
+				PW = #PW:VARCHAR:NO_ENTRY#
+				</isNotEmpty>
+				<isNotEmpty property="MEM_NAME">
+				,MEM_NAME = #MEM_NAME:VARCHAR:NO_ENTRY#
+				</isNotEmpty>
+				<isNotEmpty property="DEPT">
+				,DEPT = #DEPT:VARCHAR:NO_ENTRY#
+				</isNotEmpty>
+				<isNotEmpty property="GRADE">
+				,GRADE = #GRADE:VARCHAR:NO_ENTRY#
+				</isNotEmpty>
+				<isNotEmpty property="MOBILE">
+				,MOBILE = #MOBILE:VARCHAR:NO_ENTRY#
+				</isNotEmpty>
+				<isNotEmpty property="PHONE">
+				,PHONE = #PHONE:VARCHAR:NO_ENTRY#
+				</isNotEmpty>
+				<isNotEmpty property="EMAIL">
+				,EMAIL = #EMAIL:VARCHAR:NO_ENTRY#
+				</isNotEmpty>
+				<isNotEmpty property="BIGO">
+				,BIGO = #BIGO:VARCHAR:NO_ENTRY#
+				</isNotEmpty>
+				<isNotEmpty property="SAE_MEM_YN">
+				,SAE_MEM_YN = #SAE_MEM_YN:VARCHAR:NO_ENTRY#
+				</isNotEmpty>
+		WHERE
+			MEM_ID=#MEM_ID#
+	</update>
+
+	<delete id="deleteMemberItem">
+		DELETE /* [sit-member.xml].[member.deleteMemberItem].[01] 변경일자(2011.03) */
+		MEMBER_ITEM
+		WHERE 1=1
+			AND MEM_ID=#MEM_ID#
+	</delete>
+
+		
+	<select id="getTranConfirmCnt" parameterClass="hmap" resultClass="int">
+	<![CDATA[
+		select count(*) AS CNT
+		from tbl_user_detail
+		where loginId in ( 
+			select loginId from tbl_user
+			where deptId in (
+				select deptId from tbl_user
+				where loginId = #userid#
+			)
+		)
+		and grade = '3'
+	]]>
+	</select>
+	
+	<!-- Log 저장-->
+	<insert id="insertLog">
+		INSERT 
+		INTO TBL_CONFIRM_SET_LOG
+		(
+			setTime
+			,userName
+			,targetName
+			,grade
+		)VALUES
+		(
+			getdate()
+			,#setName#
+			,#userid#
+			,#grade#
+		)
+	</insert>	
+	
+	<select id="getLogList" resultClass="hmap" parameterClass="map">
+	    SELECT
+			M.setTime
+			,M.userName
+			,M.targetName
+			,M.grade
+			,M.setName
+			,M.setDeName
+			,M.tagetName
+			,M.tagetDeName
+			,M.totCnt
+		FROM (
+				SELECT 
+					LG.setTime
+					,LG.userName
+					,LG.targetName
+					,LG.grade
+					,TU.name AS setName
+					,TU.deName AS setDeName
+					,TG.name AS tagetName
+					,TG.deName AS tagetDeName
+					,ROW_NUMBER() OVER ( ORDER BY LG.setTime  DESC ) ROWNO
+					, SUM(1) OVER() AS totCnt
+				FROM 
+						tbl_confirm_set_log LG
+				LEFT JOIN (select A.userId, A.loginId
+				                , A.name, B.name AS deName 
+										from TBL_USER A, TBL_DEPARTMENT B 
+										WHERE	A.deptId = B.deptId ) TU 
+				ON LG.userName = TU.loginId
+				LEFT JOIN (select A.userId, A.loginId
+				                , A.name, B.name AS deName 
+										from TBL_USER A, TBL_DEPARTMENT B 
+										WHERE	A.deptId = B.deptId ) TG 
+				ON LG.targetName = TG.loginId
+				WHERE 
+					1=1
+				<isNotEmpty property="searchSt">
+			      	<isNotEmpty property="searchEt">
+						AND LG.setTime BETWEEN CONVERT( DATETIME, #searchSt#)  
+						                  AND CONVERT( DATETIME, #searchEt#  + ' 23:59:59.999')
+			      	</isNotEmpty>
+		      	</isNotEmpty>
+		 ) M
+		 WHERE 1=1		
+		 AND M.ROWNO BETWEEN #stRow# AND #edRow#	
+		ORDER BY M.setTime desc     	
+	</select>
+	
+	
+</sqlMap>

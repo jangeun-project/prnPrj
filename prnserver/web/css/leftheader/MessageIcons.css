@@ -1,0 +1,13 @@
+.message-icon {
+  background-image: url("../../img/message/message_icons.png");
+}
+.message-icon-alert {
+  background-position: -0px -0px;
+  width: 38px;
+  height: 38px;
+}
+.message-icon-info {
+  background-position: -0px -38px;
+  width: 38px;
+  height: 38px;
+}

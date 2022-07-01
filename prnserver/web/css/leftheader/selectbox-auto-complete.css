@@ -1,0 +1,77 @@
+.select2.select2-container {
+  max-width: 100%; }
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+  line-height: 32px;
+  border-radius: .25rem; }
+
+.select2-container .select2-selection {
+  height: 32px;
+  border-color: #ccc; }
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+  height: 30px; }
+
+.select2-results__option {
+  border-bottom: 1px solid #edf0f2; }
+
+.select2-result-repository__description--right-to-left {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+  direction: rtl;
+  unicode-bidi: bidi-override; }
+
+.select2-result-repository__description,
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+  color: #373a3c; }
+
+.select2-result-repository__description_icon {
+  color: #818a91; }
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+  background-color: #f0f3f5; }
+
+.select2-dropdown {
+  border-color: #ccc; }
+
+.select2-container--default .select2-selection--single,
+.select2-container--default .select2-selection--multiple,
+.select2-container--default .select2-selection--multiple .select2-selection__choice,
+.select2-container--default .select2-search--dropdown .select2-search__field {
+  border-color: #ccc; }
+
+.select2-container--default .select2-search--dropdown .select2-search__field {
+  display: block;
+  width: 100%;
+  padding: .375rem .75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #55595c;
+  background-color: #fff;
+  background-image: none;
+  border: 1px solid #ccc;
+  border-radius: .25rem; }
+
+.select2-result-repository__title--no-description {
+  line-height: 3rem; }
+
+.load-more {
+  padding: 6px; }
+
+.select2-selection__clear {
+  color: #888; }
+
+.input-group--auto-complete {
+  position: static; }
+
+.input-group .select2-container .select2-selection,
+.input-group--auto-complete .select2-container .select2-selection {
+  height: 33px; }
+
+.input-group .select2-container--default .select2-selection--single,
+.input-group--auto-complete .select2-container--default .select2-selection--single {
+  border-radius: 4px 0 0 4px; }
+
+/*# sourceMappingURL=selectbox-auto-complete.css.map */

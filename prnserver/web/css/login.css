@@ -1,0 +1,42 @@
+@charset "utf-8";
+/* MWStory R&D Team DongHwan Kim 140718 */
+
+/*** Common ***/
+body {background-color:#000}
+body,p,h1,h2,h3,h4,h5,h6,ul,ol,li,dl,dt,dd,table,th,td,form,fieldset,legend,input,textarea,button,select{margin:0;padding:0}
+body,input,textarea,select,button,table{font-family:'돋움',Dotum,AppleGothic,sans- serif;font-size:12px}
+img,fieldset{border:0}
+ul,ol{list-style:none}
+em,address{font-style:normal}
+a{color:#2A2A2A;text-decoration:none}
+a:hover{color:#007BC2;text-decoration:none}
+a:active,a:focus{text-decoration:underline}
+
+/*** redefine ***/
+.blind {visibility:hidden;overflow:hidden;position:absolute;top:0;left:0;width:0;height:0;font-size:0;line-height:0}
+button {background-color:#898989;color:#FFF;border:0;border-radius:3px}
+button[type="submit"] {background-color:#0081CC}
+
+/*** Layout ***/
+#wrap {width:100%}
+#container {width:266px !important;margin:150px auto 0 !important}
+#footer {margin:50px 0 0 0}
+
+/*** container ***/
+.login_zone {margin:20px 0 0 0}
+.login_box {display:inline}
+.login_box label {overflow:hidden;position:absolute;padding:0 0 0 20px;font-size:1.2em;font-weight:bold;line-height:45px}
+.login_box input {display:block;width:252px;height:40px;padding:0 0 0 10px;border-width:1px;font-size:1.2em;vertical-align:middle;.height:25px;.padding-top:13px;}
+.login_box .tx_id {border-top-left-radius:5px;border-top-right-radius:5px;line-height:45px;*line-height:12px}
+.login_box .tx_pw {border-top-style:none;border-bottom-left-radius:5px;border-bottom-right-radius:5px;line-height:45px;*line-height:12px}
+.login_opt {color:#FFF;padding:3px 0 0 0}
+.opt1 input {vertical-align:middle}
+.opt1 span {margin:0 0 0 3px}
+.btn_box {margin:10px 0 0 0}
+.btn_box button {width:264px;height:40px;font-size:1.2em;font-weight:bold}
+.lnk_page {margin:10px 0 0 0}
+.lnk_page span {color:#FFF;float:right;}
+
+/*** copyright ***/
+.copyright {text-align:center}
+.copyright span {color:#767676}

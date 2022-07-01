@@ -1,0 +1,24 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>PrnServer</title>
+</head>
+<body>
+<script type="text/javascript" language="javascript">
+
+	alert("접속이 끊어졌습니다. 재로그인 하세요.");
+	if (typeof(opener) == "object")
+	{
+		//opener.document.location.replace("/prnserver/login.do");
+		self.location.replace("/prnserver/login.do");
+		setTimeout("window.close()", 500);
+	}
+	else
+	{
+		self.location.replace("/prnserver/login.do");		
+	}
+
+</script>
+</body>
+</html>

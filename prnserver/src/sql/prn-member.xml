@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="member">
+	<select id="selectAdminMember" resultClass="hmap" parameterClass="map">
+		SELECT 
+			password, grade 
+		FROM 
+			tbL_user_Detail
+		WHERE 
+			loginId	 = 'admin'	
+	
+	</select>
+	
+	<!-- Admin 저장-->
+	<insert id="insertAdminMember">
+		INSERT 
+		INTO tbl_user_detail
+		(
+			loginId
+			,password
+			,grade
+			,updateTime
+		)
+		VALUES
+		(	
+			'admin'
+			,#adminpw#
+			,'9'
+			, getDate()
+		)
+	</insert>
+	
+	<select id="selectMember" resultClass="hmap" parameterClass="map">
+		SELECT 
+			 X.userId  AS userIdx
+			, X.loginId AS loginId
+			, D.password AS password   
+			,X.name AS userName 
+			,'' AS email 
+			,X.deptId AS deptCode 
+    		, dbo.ufn_getFullDeptName( X.deptId ) AS deptName
+			, D.grade AS grade
+		FROM 
+			TBL_USER X
+			LEFT JOIN  tbL_user_Detail D
+				ON  X.loginId = D.loginId
+		WHERE
+			 X.loginId = #userid#
+	
+	    <!-- 
+		SELECT 
+			U.UserName AS loginId
+			, U.UserDN AS userIdx
+			, D.password AS password
+			, U.Description AS userName
+			, U.EmailAddress AS email
+			, U.UserGroupDN AS deptCode
+			, (SELECT UserGroupName FROM PSESCoreDB.dbo.UserGroup WHERE U.UserGroupDN = UserGroupDN) AS deptName
+			, D.grade AS grade
+		FROM 
+			PSESCoreDB.dbo.ESUser U
+			LEFT JOIN  tbL_user_Detail D
+				ON  U.UserName = D.loginId
+		WHERE
+			 U.UserName = #userid#
+		 -->	
+	</select>
+
+	<select id="getMemberList" resultClass="hmap" parameterClass="map">
+		SELECT
+			M.loginId
+			,M.password
+			,M.userName
+			,M.email
+			,M.grade
+			,M.deptName
+			,M.userGroupDN
+			,M.totCnt
+		FROM (	
+			SELECT 
+					 T.loginId
+					,T.password
+					,T.userName
+					,T.email
+					,T.grade
+					,T.deptName
+					,T.userGroupDN
+					,ROW_NUMBER() OVER ( ORDER BY  T.deptName, T.userName ASC ) ROWNO
+				 	, SUM(1) OVER() AS totCnt
+			FROM		
+				 (SELECT
+						  X.loginId AS loginId
+						, D.password AS password
+						, X.name AS userName
+						, '' AS email
+						, X.deptId AS userGroupDN
+						, ISNULL(D.grade, '1') AS grade
+						, dbo.ufn_getFullDeptName( X.deptId ) AS deptName
+					FROM 
+						TBL_USER X
+						LEFT JOIN  tbL_user_Detail D
+					ON  X.loginId = D.loginId
+			      ) T
+	 		WHERE
+				1=1
+				<isNotEmpty property="searchName" prepend="AND"> T.userName LIKE '%' + #searchName# + '%'</isNotEmpty> 	     
+				<isNotEmpty property="searchId" prepend="AND"> T.loginId LIKE '%' + #searchId# + '%'</isNotEmpty>
+				<isNotEmpty property="searchDept" prepend="AND"> T.deptName LIKE '%' + #searchDept# + '%'</isNotEmpty>
+				<isNotEmpty property="searchDeptCd" prepend="AND"> T.userGroupDN = #searchDeptCd# </isNotEmpty>
+				<isNotEmpty property="searchGrade" prepend="AND"> T.grade = #searchGrade# </isNotEmpty>
+		) M
+		WHERE 1=1		
+		 AND M.ROWNO BETWEEN #stRow# AND #edRow#	
+		ORDER BY M.deptName, M.userName	ASC
+		
+		<!--
+		SELECT
+			M.loginId
+			,M.password
+			,M.userName
+			,M.email
+			,M.grade
+			,M.deptName
+			,M.userGroupDN
+			,M.totCnt
+		FROM (	
+			SELECT 
+					 T.loginId
+					,T.password
+					,T.userName
+					,T.email
+					,T.grade
+					,T.deptName
+					,T.userGroupDN
+					,ROW_NUMBER() OVER ( ORDER BY  T.deptName, T.userName ASC ) ROWNO
+				 	, SUM(1) OVER() AS totCnt
+			FROM		
+				 (SELECT
+						 U.UserName AS loginId
+						, D.password AS password
+						, U.Description AS userName
+						, U.EmailAddress AS email
+						, U.UserGroupDN AS userGroupDN
+						, ISNULL(D.grade, '1') AS grade
+						, (SELECT UserGroupName FROM PSESCoreDB.dbo.UserGroup WHERE U.UserGroupDN = UserGroupDN) AS deptName
+					FROM 
+						PSESCoreDB.dbo.ESUser U
+						LEFT JOIN  tbL_user_Detail D
+					ON  U.UserName = D.loginId
+			      ) T
+	 		WHERE
+				1=1
+				<isNotEmpty property="searchName" prepend="AND"> T.userName LIKE '%' + #searchName# + '%'</isNotEmpty> 	     
+				<isNotEmpty property="searchId" prepend="AND"> T.loginId LIKE '%' + #searchId# + '%'</isNotEmpty>
+				<isNotEmpty property="searchDept" prepend="AND"> T.deptName LIKE '%' + #searchDept# + '%'</isNotEmpty>
+				<isNotEmpty property="searchDeptCd" prepend="AND"> T.userGroupDN = #searchDeptCd# </isNotEmpty>
+				<isNotEmpty property="searchGrade" prepend="AND"> T.grade = #searchGrade# </isNotEmpty>
+		) M
+		WHERE 1=1		
+		 AND M.ROWNO BETWEEN #stRow# AND #edRow#	
+		ORDER BY M.deptName, M.userName	ASC
+		-->
+	</select>
+	
+    <!-- Member 저장-->
+	<insert id="insertMember">
+		INSERT 
+		INTO TB_MEMBER
+		(
+			USER_ID
+			,USER_PW
+			,USER_NM
+			,DEPART
+			,EMAIL
+			,GRADE
+			,DEL_YN
+			,REG_DT
+		)
+		VALUES
+		(
+			#userId#
+			,#userPw#
+			,#userNm#
+			,#depart#
+			,#email#
+			,#grade#
+			,'N'
+			,GETDATE() 
+		)
+	</insert>
+
+
+	<update id="setUpdateId">
+		UPDATE 
+		tbL_user_Detail
+			SET
+				<isNotEmpty property="userNm">
+				grade = #grade:VARCHAR:NO_ENTRY#
+				</isNotEmpty>
+		WHERE
+			loginId=#userid#
+	</update>
+
+	<update id="deleteMember">
+		UPDATE 
+			MEMBER
+		SET 
+			DEL_YN = 'Y'	
+		WHERE 1=1
+			AND USER_ID=#userId#
+	</update>
+
+	<select id="selectMemberDetail" parameterClass="hmap" resultClass="int">
+	<![CDATA[
+		SELECT COUNT(1) AS CNT
+		FROM tbl_user_detail
+		WHERE loginId = #userid#
+	]]>
+	</select>
+	
+	<insert id="setInsertId">
+		INSERT 
+		INTO tbl_user_detail
+		(
+			loginId
+			,password
+			,grade
+			,updateTime
+		)
+		VALUES
+		(
+			#userid#
+			,null
+			,#grade#
+			, getDate()
+		)
+	</insert>
+	
+	<insert id="setInsertPw">
+		INSERT 
+		INTO tbl_user_detail
+		(
+			loginId
+			,password
+			,grade
+			,updateTime
+		)
+		VALUES
+		(
+			#userid#
+			,#newuserpw#
+			,'1'
+			, getDate()
+		)
+	</insert>
+	
+	<update id="setUpdatePw">
+		UPDATE 
+			tbl_user_detail
+		SET 
+			password = #newuserpw#	
+		WHERE 1=1
+			AND loginId = #userid#
+	</update>
+	
+	<insert id="setInsertChangeConfirm">
+		INSERT 
+		INTO tbl_user_detail
+		(
+			loginId
+			,password
+			,grade
+			,updateTime
+		)
+		VALUES
+		(
+			#userid#
+			, null
+			,#grade#
+			, getDate()
+		)
+	</insert>
+	
+	<update id="setChangeConfirm">
+		UPDATE 
+		tbL_user_Detail
+			SET
+				grade = #grade#
+		WHERE
+			loginId = #userid#
+	</update>
+	
+</sqlMap>

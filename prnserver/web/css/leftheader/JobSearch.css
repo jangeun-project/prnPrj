@@ -1,0 +1,32 @@
+.job-list__advanced-filter {
+    clear: both;
+    padding: 2rem 0 2rem 2rem;
+}
+
+.jobs__type_filter {
+    padding-top: 2em;
+}
+
+.job-list__status-filter {
+    -webkit-column-count: 4;
+       -moz-column-count: 4;
+            column-count: 4;
+}
+
+/* Fix for Chrome multi-column balancing bug */
+.job-list__status-filter .checkbox {
+    display: inline-block;
+    width: 100%;
+}
+
+.job-list__preview--not-available {
+    color: #d2d2d2;
+}
+
+.job-list__unknown-job {
+    color: #f0ad4e;
+}
+
+.job-list__deleted-user-job {
+    color: #fb4a46;
+}

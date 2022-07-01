@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
+	<classpathentry kind="lib" path="D:/psub/prnPrj/workspace/prnserver/web/WEB-INF/lib/commons-dbcp2-2.5.0.jar"/>
+	<classpathentry kind="lib" path="D:/psub/prnPrj/workspace/prnserver/web/WEB-INF/lib/commons-compress-1.5.jar"/>
+	<classpathentry kind="lib" path="D:/psub/prnPrj/workspace/prnserver/web/WEB-INF/lib/postgresql-42.2.10.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Users/admin/Downloads/mariadb-java-client-2.6.1.jar"/>
+	<classpathentry kind="output" path="web/WEB-INF/classes"/>
+</classpath>

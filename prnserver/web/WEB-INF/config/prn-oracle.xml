@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMapConfig PUBLIC "-//ibatis.apache.org/DTD SQL Map Config 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-config-2.dtd">
+<sqlMapConfig>
+    <settings useStatementNamespaces="true" enhancementEnabled="true"/>
+    
+    <typeAlias type="java.util.HashMap" alias="hmap"/>
+    
+    <sqlMap resource="sql/prn-template.xml" />
+    <sqlMap resource="sql/prn-member.xml" />
+    <sqlMap resource="sql/prn-print.xml" />
+</sqlMapConfig> 

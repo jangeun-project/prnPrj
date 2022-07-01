@@ -1,0 +1,83 @@
+
+.job-state-ACCEPTED {
+    font-weight: bold;
+}
+
+.job-state-CANCELED {
+    font-style: italic;
+    color: #933;
+}
+
+.job-state-CANCELED_TO_REQUEUE {
+    font-style: italic;
+    color: #933;
+}
+
+.job-state-PRINTING {
+    font-weight: bold;
+    font-style: italic;
+}
+
+.job-state-REJECTED {
+    font-style: italic;
+    color: #933;
+}
+
+.job-state-REQUEUED {
+    font-style: italic;
+}
+
+.job-state-SECURITY_VIOLATION {
+    font-weight: bold;
+    font-style: italic;
+    color: #933;
+}
+
+.job-state-PRINTER_ERROR {
+    font-weight: bold;
+    color: #933;
+}
+
+.job-state-SPOOLER_ERROR {
+    font-weight: bold;
+    color: #933;
+}
+
+.job-state-DELETED {
+    font-style: italic;
+    color: #339;
+}
+
+.job-state-PRINTED_LOCAL {
+    color: #339;
+}
+
+.job-state-PRINTED_CR {
+    color: #339;
+}
+
+.job-state-INVALID_JOB {
+    font-weight: bold;
+    color: #c33;
+}
+
+.job-state-DIAGNOSTIC {
+    color: #339;
+}
+
+.job-state-PAYMENT_SYSTEM_TRANSACTION {
+    font-weight: bold;
+}
+
+.job-state-FAX_INCOMING_ERROR,
+.job-state-FAX_OUTGOING_ERROR,
+.job-state-FAX_PRINT_ERROR,
+.job-state-3D-ERROR,
+.job-state-ERROR_3D_NO_MORE_FILAMENT,
+.job-state-ERROR_3D_NOZZLE_JAM,
+.job-state-ERROR_3D_MODEL_UNSTACK_FROM_BED,
+.job-state-ERROR_3D_HARDWARE_FAILURE_DETECTED,
+.job-state-ERROR_3D_BREAK_IN {
+    font-weight: bold;
+    color: #933;
+}

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="template">
+	<select id="selectTemp" resultClass="hmap" parameterClass="map">
+		SELECT 
+			templateId
+			,title AS TITLE
+			,content AS CONTENT
+		FROM 
+			TBL_TEMPLATE
+		WHERE 
+			templateId = #id#
+
+	</select>
+	
+
+
+</sqlMap>
